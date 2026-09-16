@@ -314,8 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         {
             // Slide 2: Family Protection & Obedience
-            title: "BOARD & TRAIN<br>PROGRAMS",
-            description: "Imagine a dog that’s calm, reliable, and always looking out for your family. Our in-home and intensive training programs help dogs build confidence, master obedience, and become the trusted companion every household needs. Start your journey to a safer, happier home today",
+            title: "ADVANCED DOG<br>TRAINING",
+            description: "Imagine a dog that’s calm, confident, and responsive—at home and out in the world. Our in-home and intensive training programs help dogs master advanced obedience skills, stay focused around distractions, and become trusted companions for the whole family. Take the next step toward a stronger bond and a happier home.",
             ctaText: "Choose Training Program",
             ctaLink: "protection-dog-services"
         }
