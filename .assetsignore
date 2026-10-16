@@ -1,0 +1,10 @@
+.git
+.github
+.vscode
+.wrangler
+node_modules
+wrangler.jsonc
+.assetsignore
+vercel.json
+CNAME
+*.md
