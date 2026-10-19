@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
     if (typeof body === 'string') {
         try { body = JSON.parse(body); } catch { body = {}; }
     }
-    const { title, category, excerpt, bodyText, imageBase64, imageMime } = body || {};
+    const { title, metaTitle, metaDescription, slug: customSlug, imageAlt: customImageAlt, category, bodyText, imageBase64, imageMime } = body || {};
 
     if (!title || !String(title).trim()) {
         res.status(400).json({ error: 'missing_title' });
@@ -38,9 +38,12 @@ module.exports = async (req, res) => {
         return;
     }
 
-    const baseSlug = slugify(title);
-    if (!baseSlug) {
-        res.status(400).json({ error: 'bad_title' });
+    const baseSlug = slugify(customSlug && String(customSlug).trim() ? customSlug : title);
+    if (!baseSlug || baseSlug.length < 3) {
+        // Most likely the title isn't in Latin letters (e.g. Russian), so almost
+        // nothing survived slugify(). Ask for an explicit URL instead of
+        // publishing a near-empty or meaningless one.
+        res.status(400).json({ error: 'need_manual_slug' });
         return;
     }
 
@@ -56,16 +59,20 @@ module.exports = async (req, res) => {
 
         const ext = MIME_EXT[imageMime];
         const imagePath = `assets/Blogs-img/${slug}.${ext}`;
-        const imageAlt = `${title}`;
+        const imageAlt = customImageAlt && String(customImageAlt).trim() ? String(customImageAlt).trim() : String(title).trim();
         const dateIso = new Date().toISOString();
         const categoryText = category && String(category).trim() ? String(category).trim() : 'Dog Training';
-        const excerptText = excerpt && String(excerpt).trim() ? String(excerpt).trim() : String(bodyText).trim().split(/\n+/)[0].slice(0, 160);
+        const descriptionText = metaDescription && String(metaDescription).trim()
+            ? String(metaDescription).trim()
+            : String(bodyText).trim().split(/\n+/)[0].slice(0, 160);
+        const metaTitleText = metaTitle && String(metaTitle).trim() ? String(metaTitle).trim() : undefined;
 
         const bodyHtml = bodyTextToHtml(bodyText);
         const postHtml = renderPostHtml({
             title: String(title).trim(),
+            metaTitle: metaTitleText,
             slug,
-            description: excerptText,
+            description: descriptionText,
             category: categoryText,
             imageSrc: imagePath,
             imageAlt,
@@ -85,7 +92,7 @@ module.exports = async (req, res) => {
             const card = renderBlogCard({
                 title: String(title).trim(),
                 slug,
-                excerpt: excerptText,
+                excerpt: descriptionText,
                 category: categoryText,
                 imageSrc: imagePath,
                 imageAlt,

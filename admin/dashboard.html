@@ -66,6 +66,14 @@
     }
     textarea#bodyText { min-height: 260px; line-height: 1.5; }
     input:focus, textarea:focus { outline: none; border-color: #f9700f; }
+    .seo-field { background: #fbfaf7; border: 1px dashed #ddd; }
+    .seo-field > label { margin-bottom: 4px; }
+    .seo-field > .hint { margin-bottom: 14px; }
+    .seo-sub { margin-top: 16px; }
+    .seo-sub:first-of-type { margin-top: 0; }
+    .seo-sub label { font-size: 0.85rem; margin-bottom: 5px; }
+    .seo-sub .hint { font-size: 0.78rem; margin: -2px 0 8px; }
+    #metaTitlePreview, #slugPreview { color: #555; }
     #imagePreview {
         margin-top: 12px;
         max-width: 260px;
@@ -102,14 +110,28 @@
                 <input type="text" id="title" required placeholder="Например: Как выбрать щенка немецкой овчарки">
             </div>
             <div class="field">
-                <label for="category">Категория</label>
-                <div class="hint">Короткий ярлык, например "Puppy Training" или "Health & Care"</div>
-                <input type="text" id="category" placeholder="Dog Training">
-            </div>
-            <div class="field">
-                <label for="excerpt">Краткое описание</label>
-                <div class="hint">Показывается в списке блогов и в соцсетях. Необязательно — если оставить пустым, возьму начало текста.</div>
+                <label for="excerpt">Краткое описание (meta description)</label>
+                <div class="hint">Показывается в списке блогов, в соцсетях и в результатах поиска Google. Необязательно — если оставить пустым, возьму начало текста.</div>
                 <input type="text" id="excerpt" maxlength="160">
+            </div>
+            <div class="field seo-field">
+                <label>SEO-настройки (необязательно)</label>
+                <div class="hint">Можно не трогать — всё заполнится само на основе заголовка. Открывайте, если хотите задать вручную.</div>
+                <div class="seo-sub">
+                    <label for="metaTitle">Meta title</label>
+                    <div class="hint">Заголовок, который видно во вкладке браузера и в поиске Google. По умолчанию: "<span id="metaTitlePreview">Заголовок поста</span> | Elite K9 Group"</div>
+                    <input type="text" id="metaTitle" placeholder="Оставьте пустым для значения по умолчанию">
+                </div>
+                <div class="seo-sub">
+                    <label for="slug">URL (адрес страницы)</label>
+                    <div class="hint">elitek9group.com/<span id="slugPreview">adres-stranicy</span> — латиницей, без пробелов. Пусто — соберу из заголовка (если заголовок не на английском — заполните это поле сами).</div>
+                    <input type="text" id="slug" placeholder="Оставьте пустым для значения по умолчанию">
+                </div>
+                <div class="seo-sub">
+                    <label for="imageAlt">Alt-текст картинки</label>
+                    <div class="hint">Описание картинки для поисковиков и незрячих пользователей. Пусто — возьму заголовок поста.</div>
+                    <input type="text" id="imageAlt" placeholder="Оставьте пустым для значения по умолчанию">
+                </div>
             </div>
             <div class="field">
                 <label for="image">Главная картинка</label>
@@ -185,6 +207,26 @@ function resizeImage(file, maxWidth, quality) {
     });
 }
 
+function clientSlugify(str) {
+    return (str || '')
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+}
+
+const titleInput = document.getElementById('title');
+const metaTitlePreview = document.getElementById('metaTitlePreview');
+const slugPreview = document.getElementById('slugPreview');
+
+titleInput.addEventListener('input', () => {
+    const value = titleInput.value.trim();
+    metaTitlePreview.textContent = value || 'Заголовок поста';
+    slugPreview.textContent = clientSlugify(value) || 'adres-stranicy';
+});
+
 const form = document.getElementById('postForm');
 const publishBtn = document.getElementById('publishBtn');
 const statusMsg = document.getElementById('statusMsg');
@@ -209,8 +251,10 @@ form.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title: document.getElementById('title').value,
-                category: document.getElementById('category').value,
                 excerpt: document.getElementById('excerpt').value,
+                metaTitle: document.getElementById('metaTitle').value,
+                slug: document.getElementById('slug').value,
+                imageAlt: document.getElementById('imageAlt').value,
                 bodyText: document.getElementById('bodyText').value,
                 imageBase64: resizedImage.base64,
                 imageMime: resizedImage.mime,
@@ -223,6 +267,11 @@ form.addEventListener('submit', async (e) => {
             form.reset();
             imagePreview.style.display = 'none';
             resizedImage = null;
+            metaTitlePreview.textContent = 'Заголовок поста';
+            slugPreview.textContent = 'adres-stranicy';
+        } else if (data.error === 'need_manual_slug') {
+            statusMsg.textContent = 'Заполните поле "URL" вручную латиницей (из заголовка не на английском адрес не собрать)';
+            statusMsg.className = 'status err';
         } else {
             statusMsg.textContent = 'Ошибка: ' + (data.error || 'неизвестная');
             statusMsg.className = 'status err';
