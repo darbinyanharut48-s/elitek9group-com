@@ -140,13 +140,22 @@
             </div>
             <div class="field">
                 <label for="bodyText">Текст поста</label>
-                <div class="hint">Пустая строка — новый абзац. **текст** — жирный. Строки, начинающиеся с "- " — становятся списком.</div>
+                <div class="hint">
+                    Пустая строка — новый абзац · <strong>**текст**</strong> — жирный · <strong>## Заголовок</strong> — подзаголовок ·
+                    строки с "- " или "* " — маркированный список · строки "1. " "2. " — нумерованный список ·
+                    <strong>[текст](https://ссылка)</strong> — ссылка
+                </div>
                 <textarea id="bodyText" required placeholder="Первый абзац...
 
-Второй абзац с **важным** словом.
+## Подзаголовок
+
+Второй абзац с **важным** словом и [ссылкой](https://elitek9group.com/consultation).
 
 - Пункт списка
-- Ещё пункт"></textarea>
+- Ещё пункт
+
+1. Шаг первый
+2. Шаг второй"></textarea>
             </div>
             <div class="submit-row">
                 <button type="submit" class="publish" id="publishBtn">Опубликовать</button>
