@@ -33,8 +33,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ========================= */
 
     btn.innerHTML = `
-        <img src="assets/images/grok-video-51f047fb-90ae-435d-94a5-96b3ebbfd7bb-(1).gif"
-             style="width:100%;height:100%;object-fit:cover;">
+        <video autoplay muted loop playsinline
+             style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            <source src="assets/images/dogbot-icon.mp4" type="video/mp4">
+        </video>
         <span class="btn-text">Talk to me<br>I am DogBot</span>
     `;
 
