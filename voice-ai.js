@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const greetingAudio = new Audio("assets/audio/dog-bot.wav");
     const answerAudio = new Audio("assets/audio/dog-answer.wav");
 
-    greetingAudio.preload = "auto";
-    answerAudio.preload = "auto";
+    greetingAudio.preload = "none";
+    answerAudio.preload = "none";
 
     function playAudio(audio, callback) {
         audio.currentTime = 0;
