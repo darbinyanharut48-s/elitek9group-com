@@ -108,6 +108,13 @@ form.addEventListener('submit', async (e) => {
             window.location.href = '/admin/dashboard.html';
             return;
         }
+        let data = {};
+        try { data = await res.json(); } catch {}
+        if (data.error === 'admin_not_configured') {
+            errorMsg.textContent = 'Сервер ещё не настроен: не заданы ADMIN_USERNAME/ADMIN_PASSWORD в Vercel (или не было пересборки после их добавления)';
+        } else {
+            errorMsg.textContent = 'Неверный логин или пароль';
+        }
         errorMsg.style.display = 'block';
     } catch (err) {
         errorMsg.textContent = 'Ошибка сети, попробуйте ещё раз';
