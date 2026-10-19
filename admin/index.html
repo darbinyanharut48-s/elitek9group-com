@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Вход в админку — Elite K9 Group</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1d2b22;
+        font-family: 'Outfit', Arial, sans-serif;
+    }
+    .card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 36px 32px;
+        width: 100%;
+        max-width: 360px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+    h1 {
+        margin: 0 0 6px;
+        font-size: 1.4rem;
+        color: #222;
+    }
+    p.sub {
+        margin: 0 0 24px;
+        color: #777;
+        font-size: 0.92rem;
+    }
+    label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+    }
+    input {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        margin-bottom: 18px;
+    }
+    input:focus {
+        outline: none;
+        border-color: #f9700f;
+    }
+    button {
+        width: 100%;
+        padding: 12px;
+        background: #f9700f;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .error {
+        color: #b3261e;
+        font-size: 0.88rem;
+        margin: -8px 0 14px;
+        display: none;
+    }
+</style>
+</head>
+<body>
+    <form class="card" id="loginForm" autocomplete="off">
+        <h1>Вход в админку</h1>
+        <p class="sub">Elite K9 Group — добавление постов блога</p>
+        <div class="error" id="errorMsg">Неверный логин или пароль</div>
+        <label for="username">Логин</label>
+        <input type="text" id="username" name="username" autocomplete="username" required>
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+        <button type="submit" id="submitBtn">Войти</button>
+    </form>
+
+<script>
+const form = document.getElementById('loginForm');
+const errorMsg = document.getElementById('errorMsg');
+const submitBtn = document.getElementById('submitBtn');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorMsg.style.display = 'none';
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Входим...';
+    try {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            }),
+        });
+        if (res.ok) {
+            window.location.href = '/admin/dashboard.html';
+            return;
+        }
+        errorMsg.style.display = 'block';
+    } catch (err) {
+        errorMsg.textContent = 'Ошибка сети, попробуйте ещё раз';
+        errorMsg.style.display = 'block';
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Войти';
+    }
+});
+</script>
+</body>
+</html>
