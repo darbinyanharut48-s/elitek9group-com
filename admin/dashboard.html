@@ -282,7 +282,7 @@ form.addEventListener('submit', async (e) => {
             statusMsg.textContent = 'Заполните поле "URL" вручную латиницей (из заголовка не на английском адрес не собрать)';
             statusMsg.className = 'status err';
         } else {
-            statusMsg.textContent = 'Ошибка: ' + (data.error || 'неизвестная');
+            statusMsg.textContent = 'Ошибка: ' + (data.error || 'неизвестная') + (data.detail ? ' — ' + data.detail : '');
             statusMsg.className = 'status err';
         }
     } catch (err) {
