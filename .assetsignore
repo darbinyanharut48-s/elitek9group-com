@@ -5,6 +5,7 @@
 node_modules
 wrangler.jsonc
 .assetsignore
+.gitignore
 vercel.json
 CNAME
 *.md

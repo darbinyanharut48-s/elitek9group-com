@@ -288,6 +288,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- New Hero Slider Logic ---
     const heroSlides = document.querySelectorAll('.hero-bg-slide');
+
+    // Load non-visible hero slide backgrounds only after the page has finished loading,
+    // so they don't compete with the active slide's image for bandwidth.
+    window.addEventListener('load', () => {
+        heroSlides.forEach(slide => {
+            if (slide.dataset.bg) {
+                slide.style.backgroundImage = `url('${slide.dataset.bg}')`;
+            }
+        });
+    });
     const heroNextBtn = document.querySelector('.hero-next');
     const heroPrevBtn = document.querySelector('.hero-prev');
     const heroDots = document.querySelectorAll('.hero-dot');
