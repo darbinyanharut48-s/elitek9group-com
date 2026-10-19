@@ -86,28 +86,32 @@ module.exports = async (req, res) => {
         // 2. Create the post page.
         await putTextFile(`${slug}.html`, postHtml, `Add blog post "${title}"`);
 
-        // 3. Insert a card into the blog listing page.
-        const listing = await getFile('blog.html');
-        if (listing) {
-            const card = renderBlogCard({
-                title: String(title).trim(),
-                slug,
-                excerpt: descriptionText,
-                category: categoryText,
-                imageSrc: imagePath,
-                imageAlt,
-            });
+        // 3. Insert a card into the blog listing pages. "Blogs" in the nav on
+        // every page links to elitek9-blog-los-angeles.html, not blog.html --
+        // both exist with their own separate <div class="blog-grid">, so both
+        // need the new card or the post won't show up where visitors look.
+        const card = renderBlogCard({
+            title: String(title).trim(),
+            slug,
+            excerpt: descriptionText,
+            category: categoryText,
+            imageSrc: imagePath,
+            imageAlt,
+        });
+        const listingPages = ['elitek9-blog-los-angeles.html', 'blog.html'];
+        for (const page of listingPages) {
+            const listing = await getFile(page);
+            if (!listing) continue;
             const marker = '<div class="blog-grid">';
             const idx = listing.content.indexOf(marker);
-            if (idx !== -1) {
-                const insertAt = idx + marker.length;
-                const newListing =
-                    listing.content.slice(0, insertAt) +
-                    '\n                <!-- Added via admin -->\n' +
-                    card +
-                    listing.content.slice(insertAt);
-                await putTextFile('blog.html', newListing, `List new blog post "${title}"`, listing.sha);
-            }
+            if (idx === -1) continue;
+            const insertAt = idx + marker.length;
+            const newListing =
+                listing.content.slice(0, insertAt) +
+                '\n                <!-- Added via admin -->\n' +
+                card +
+                listing.content.slice(insertAt);
+            await putTextFile(page, newListing, `List new blog post "${title}"`, listing.sha);
         }
 
         res.status(200).json({ ok: true, slug, url: `https://elitek9group.com/${slug}` });
