@@ -114,6 +114,33 @@ module.exports = async (req, res) => {
             await putTextFile(page, newListing, `List new blog post "${title}"`, listing.sha);
         }
 
+        // 4. Keep the homepage's "Latest from the Blog" section (always the
+        // newest 3 posts) in sync: add the new card at the top, drop the
+        // oldest so it never shows more than 3.
+        {
+            const home = await getFile('index.html');
+            if (home) {
+                const marker = '<div class="blog-grid">';
+                const idx = home.content.indexOf(marker);
+                if (idx !== -1) {
+                    const insertAt = idx + marker.length;
+                    const before = home.content.slice(0, insertAt);
+                    const afterGrid = home.content.slice(insertAt);
+                    const articleRe = /<article class="blog-card">[\s\S]*?<\/article>\n?/g;
+                    const existingCards = afterGrid.match(articleRe) || [];
+                    const keptCards = existingCards.slice(0, 2); // drop the oldest, keep the newest 2 (+ the new one = 3)
+                    let gridTail = afterGrid;
+                    if (existingCards.length) {
+                        const lastCard = existingCards[existingCards.length - 1];
+                        const lastIdx = afterGrid.lastIndexOf(lastCard);
+                        gridTail = afterGrid.slice(lastIdx + lastCard.length);
+                    }
+                    const newHome = before + '\n                <!-- Added via admin -->\n' + card + keptCards.join('') + gridTail;
+                    await putTextFile('index.html', newHome, `Update homepage latest posts with "${title}"`, home.sha);
+                }
+            }
+        }
+
         res.status(200).json({ ok: true, slug, url: `https://elitek9group.com/${slug}` });
     } catch (err) {
         res.status(500).json({ error: 'publish_failed', detail: String(err && err.message || err) });
