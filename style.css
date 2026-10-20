@@ -5518,9 +5518,17 @@ a[href^="tel:"] {
 }
 
 /* Homepage-only "Latest from the Blog" section, styled to match the
-   Payment Plans banner it sits directly below. */
+   Payment Plans banner it sits directly below -- same gradient and the
+   same glow, so the two sections read as one continuous block. */
 .latest-blog-section {
+    position: relative;
     background: linear-gradient(135deg, #1a1a1a 0%, #2e2e2e 50%, #1a1a1a 100%);
+    overflow: hidden;
+}
+
+.latest-blog-section > .container {
+    position: relative;
+    z-index: 2;
 }
 
 @media (max-width: 768px) {
