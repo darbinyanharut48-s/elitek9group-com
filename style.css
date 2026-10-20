@@ -5484,6 +5484,37 @@ a[href^="tel:"] {
     transform: translateX(5px);
 }
 
+/* Light (white) variant -- used on every page except the homepage, which
+   keeps the original dark banner. */
+.payment-plans-banner.payment-plans-light {
+    background: #ffffff;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+
+.payment-plans-banner.payment-plans-light .payment-plans-glow {
+    display: none;
+}
+
+.payment-plans-banner.payment-plans-light .payment-title {
+    color: var(--text-color) !important;
+}
+
+.payment-plans-banner.payment-plans-light .payment-subtitle {
+    color: var(--text-light);
+}
+
+.payment-plans-banner.payment-plans-light .payment-pill {
+    background: var(--bg-light);
+    border: 1px solid rgba(249, 112, 15, 0.25);
+    color: var(--text-color);
+}
+
+.payment-plans-banner.payment-plans-light .payment-pill:hover {
+    background: rgba(249, 112, 15, 0.12);
+    border-color: rgba(249, 112, 15, 0.5);
+}
+
 @media (max-width: 768px) {
 
     .payment-plans-banner {
