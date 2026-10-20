@@ -5517,6 +5517,12 @@ a[href^="tel:"] {
     border-color: rgba(249, 112, 15, 0.6);
 }
 
+/* Homepage-only "Latest from the Blog" section, styled to match the
+   Payment Plans banner it sits directly below. */
+.latest-blog-section {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2e2e2e 50%, #1a1a1a 100%);
+}
+
 @media (max-width: 768px) {
 
     .payment-plans-banner {
