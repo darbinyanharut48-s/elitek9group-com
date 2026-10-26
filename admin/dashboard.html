@@ -141,7 +141,8 @@
             <div class="field">
                 <label for="bodyText">Текст поста</label>
                 <div class="hint">
-                    Пустая строка — новый абзац · <strong>**текст**</strong> — жирный · <strong>## Заголовок</strong> — подзаголовок ·
+                    Можно просто вставить текст из Google Docs (Ctrl+V) — настоящие ссылки, жирный текст, заголовки и списки распознаются автоматически.<br>
+                    Если печатаете вручную: пустая строка — новый абзац · <strong>**текст**</strong> — жирный · <strong>## Заголовок</strong> — подзаголовок ·
                     строки с "- " или "* " — маркированный список · строки "1. " "2. " — нумерованный список ·
                     <strong>[текст](https://ссылка)</strong> — ссылка
                 </div>
@@ -234,6 +235,138 @@ titleInput.addEventListener('input', () => {
     const value = titleInput.value.trim();
     metaTitlePreview.textContent = value || 'Заголовок поста';
     slugPreview.textContent = clientSlugify(value) || 'adres-stranicy';
+});
+
+// When text is pasted from Google Docs (or Word, or any rich editor), the
+// browser's clipboard also carries an HTML copy alongside the plain text.
+// A <textarea> can only ever hold plain text, so a normal paste silently
+// drops real hyperlinks, bold, headings and lists -- only the visible words
+// survive. This reads that HTML copy (if present) and converts real <a>
+// links / bold / lists / headings into the **bold** / [text](url) / "- "
+// markdown this form already understands, then inserts that instead of
+// letting the browser paste the lossy plain-text version.
+const bodyTextarea = document.getElementById('bodyText');
+
+function htmlToBodyMarkdown(html) {
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    function unwrapGoogleRedirect(url) {
+        try {
+            const u = new URL(url);
+            if (u.hostname.endsWith('google.com') && u.pathname === '/url' && u.searchParams.has('q')) {
+                return u.searchParams.get('q');
+            }
+        } catch (e) { /* not a valid absolute URL -- leave as-is */ }
+        return url;
+    }
+
+    function isBold(el) {
+        if (!el || el.nodeType !== 1) return false;
+        const weight = (el.style && el.style.fontWeight) || '';
+        if (weight) {
+            // An explicit style wins over the tag. Google Docs wraps its
+            // entire paste in <b style="font-weight:normal"> as a generic
+            // container, not as real bold.
+            const numeric = parseInt(weight, 10);
+            if (weight === 'normal' || (!Number.isNaN(numeric) && numeric < 600)) return false;
+            if (weight === 'bold' || (!Number.isNaN(numeric) && numeric >= 600)) return true;
+        }
+        return el.tagName === 'B' || el.tagName === 'STRONG';
+    }
+
+    function inlineText(node, boldActive) {
+        let out = '';
+        for (const child of node.childNodes) {
+            if (child.nodeType === 3) { out += child.nodeValue; continue; }
+            if (child.nodeType !== 1) continue;
+            const tag = child.tagName;
+            if (tag === 'BR') { out += '\n'; continue; }
+            if (tag === 'A') {
+                const href = child.getAttribute('href') || '';
+                const text = inlineText(child, boldActive || isBold(child)).replace(/\s+/g, ' ').trim();
+                const cleanHref = unwrapGoogleRedirect(href);
+                if (cleanHref && /^https?:\/\//i.test(cleanHref) && text) {
+                    out += `[${text}](${cleanHref})`;
+                } else {
+                    out += text;
+                }
+                continue;
+            }
+            const bold = boldActive || isBold(child);
+            const inner = inlineText(child, bold);
+            if (bold && !boldActive && inner.trim()) {
+                out += `**${inner.trim()}**`;
+            } else {
+                out += inner;
+            }
+        }
+        return out;
+    }
+
+    const lines = [];
+
+    function walkBlock(el) {
+        const tag = el.tagName;
+        if (tag === 'UL' || tag === 'OL') {
+            let n = 1;
+            const items = [];
+            for (const li of el.children) {
+                if (li.tagName !== 'LI') continue;
+                const text = inlineText(li, false).replace(/\s+/g, ' ').trim();
+                if (!text) continue;
+                items.push(tag === 'OL' ? `${n}. ${text}` : `- ${text}`);
+                if (tag === 'OL') n++;
+            }
+            // Items of the same list must stay on consecutive lines with no
+            // blank line between them, or the publish-time parser will
+            // split them into several separate lists.
+            if (items.length) lines.push(items.join('\n'));
+            return;
+        }
+        if (/^H[1-6]$/.test(tag)) {
+            const level = Math.min(Math.max(parseInt(tag[1], 10), 2), 4);
+            const text = inlineText(el, false).replace(/\s+/g, ' ').trim();
+            if (text) lines.push('#'.repeat(level) + ' ' + text);
+            return;
+        }
+        if (tag === 'P' || tag === 'DIV' || tag === 'LI') {
+            const text = inlineText(el, false).replace(/\s+/g, ' ').trim();
+            if (text) lines.push(text);
+            return;
+        }
+        for (const child of el.children) walkBlock(child);
+    }
+
+    for (const child of container.children) walkBlock(child);
+
+    if (lines.length === 0) {
+        const text = inlineText(container, false).replace(/\s+/g, ' ').trim();
+        if (text) lines.push(text);
+    }
+
+    return lines.join('\n\n');
+}
+
+bodyTextarea.addEventListener('paste', (e) => {
+    const html = e.clipboardData && e.clipboardData.getData('text/html');
+    if (!html) return; // plain-text clipboard -- let the browser paste normally
+
+    let converted;
+    try {
+        converted = htmlToBodyMarkdown(html);
+    } catch (err) {
+        return; // if anything goes wrong, fall back to the normal paste
+    }
+    if (!converted) return;
+
+    e.preventDefault();
+    const start = bodyTextarea.selectionStart;
+    const end = bodyTextarea.selectionEnd;
+    const value = bodyTextarea.value;
+    bodyTextarea.value = value.slice(0, start) + converted + value.slice(end);
+    const newPos = start + converted.length;
+    bodyTextarea.selectionStart = bodyTextarea.selectionEnd = newPos;
 });
 
 const form = document.getElementById('postForm');
