@@ -1145,6 +1145,12 @@ footer {
     opacity: 0.9;
 }
 
+.page-header .post-date {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-top: -4px;
+}
+
 /* --- Training Page --- */
 .training-section {
     border-bottom: 1px solid #eee;
@@ -1592,6 +1598,13 @@ footer {
     font-weight: 700;
     margin-bottom: 10px;
     display: block;
+}
+
+.blog-date {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--text-light);
+    margin: -6px 0 10px;
 }
 
 .blog-content h3 {

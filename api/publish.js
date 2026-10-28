@@ -97,6 +97,7 @@ module.exports = async (req, res) => {
             category: categoryText,
             imageSrc: imagePath,
             imageAlt,
+            dateIso,
         });
         const listingPages = ['elitek9-blog-los-angeles.html', 'blog.html'];
         for (const page of listingPages) {
