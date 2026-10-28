@@ -1602,8 +1602,9 @@ footer {
 
 .blog-date {
     display: block;
-    font-size: 0.78rem;
-    color: var(--text-light);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-color);
     margin: -6px 0 10px;
 }
 
