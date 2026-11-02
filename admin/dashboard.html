@@ -305,6 +305,24 @@ function htmlToBodyMarkdown(html) {
     }
 
     const lines = [];
+    const BLOCK_TAGS = ['P', 'DIV', 'LI', 'UL', 'OL', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+    function hasBlockChild(el) {
+        return Array.from(el.children).some((c) => BLOCK_TAGS.includes(c.tagName));
+    }
+    // Collapse horizontal whitespace (spaces/tabs) but keep line breaks --
+    // used whenever a chunk of inline content (no further block tags inside
+    // it) is turned into one or more lines of the final markdown. Collapsing
+    // ALL whitespace here, newlines included, would flatten multiple
+    // paragraphs/headings separated only by <br> (no real <p>/<h1-6> tags)
+    // into one giant line, hiding every "## heading" and paragraph break
+    // inside it as plain text instead of recognizable structure.
+    function normalizeInline(text) {
+        return text
+            .split('\n')
+            .map((line) => line.replace(/[ \t]+/g, ' ').trim())
+            .filter(Boolean)
+            .join('\n');
+    }
 
     function walkBlock(el) {
         const tag = el.tagName;
@@ -330,9 +348,26 @@ function htmlToBodyMarkdown(html) {
             if (text) lines.push('#'.repeat(level) + ' ' + text);
             return;
         }
-        if (tag === 'P' || tag === 'DIV' || tag === 'LI') {
+        if (tag === 'P' || tag === 'LI') {
+            // Always a single logical paragraph -- any internal <br> just
+            // becomes a space, same as before.
             const text = inlineText(el, false).replace(/\s+/g, ' ').trim();
             if (text) lines.push(text);
+            return;
+        }
+        if (tag === 'DIV') {
+            // A DIV might be one paragraph-like block, or just a generic
+            // wrapper around several real paragraphs/headings/lists (common
+            // when a source doesn't use semantic tags). If it wraps other
+            // block tags, recurse into them instead of flattening
+            // everything inside into a single paragraph; otherwise treat
+            // its content as one or more <br>-separated lines.
+            if (hasBlockChild(el)) {
+                for (const child of el.children) walkBlock(child);
+                return;
+            }
+            const normalized = normalizeInline(inlineText(el, false));
+            if (normalized) lines.push(normalized);
             return;
         }
         for (const child of el.children) walkBlock(child);
@@ -341,8 +376,12 @@ function htmlToBodyMarkdown(html) {
     for (const child of container.children) walkBlock(child);
 
     if (lines.length === 0) {
-        const text = inlineText(container, false).replace(/\s+/g, ' ').trim();
-        if (text) lines.push(text);
+        // Nothing recognized anywhere, not even a DIV -- e.g. the pasted
+        // content is just bare inline nodes with no wrapping block element
+        // at all. Same fallback as above: keep line breaks instead of
+        // collapsing everything into one giant line.
+        const normalized = normalizeInline(inlineText(container, false));
+        if (normalized) lines.push(normalized);
     }
 
     return lines.join('\n\n');
