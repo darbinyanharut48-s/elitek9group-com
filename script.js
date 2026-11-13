@@ -309,25 +309,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // Hero content variations for each slide
     const heroContent = [
         {
-            // Slide 3: Elite Dogs for Sale
-            title: "ELITE PROTECTION DOGS<br>FOR SALE",
-            description: "Don’t just get a dog—get peace of mind. Our elite protection dogs are trained, tested, and ready to guard your home and family from day one. Smart, loyal, and dependable—find your ultimate family protector in Los Angeles today.",
-            ctaText: "FIND YOUR PROTECTOR",
-            ctaLink: "protection-dogs-for-sale"
+            // Slide 1: Family Protection & Obedience
+            title: "ADVANCED DOG<br>TRAINING",
+            description: "Imagine a dog that’s calm, confident, and responsive—at home and out in the world. Our in-home and intensive training programs help dogs master advanced obedience skills, stay focused around distractions, and become trusted companions for the whole family. Take the next step toward a stronger bond and a happier home.",
+            ctaText: "Choose Training Program",
+            ctaLink: "protection-dog-services"
         },
         {
-            // Slide 1: Aggression & Behavior Modification
+            // Slide 2: Aggression & Behavior Modification
             title: "TURN AGGRESSIVE<br>INTO CALM,<br>TRUSTED BEHAVIOR",
             description: "Tired of your dog's out-of-control behavior? Our trainers help dogs chill out, stop reacting, and become the reliable buddy you’ve always wanted. Let’s get your dog and your life back on track—start today!",
             ctaText: "GET SUPPORT TODAY",
             ctaLink: "protection-dog-training-los-angeles"
         },
         {
-            // Slide 2: Family Protection & Obedience
-            title: "ADVANCED DOG<br>TRAINING",
-            description: "Imagine a dog that’s calm, confident, and responsive—at home and out in the world. Our in-home and intensive training programs help dogs master advanced obedience skills, stay focused around distractions, and become trusted companions for the whole family. Take the next step toward a stronger bond and a happier home.",
-            ctaText: "Choose Training Program",
-            ctaLink: "protection-dog-services"
+            // Slide 3: Elite Dogs for Sale
+            title: "ELITE PROTECTION DOGS<br>FOR SALE",
+            description: "Don’t just get a dog—get peace of mind. Our elite protection dogs are trained, tested, and ready to guard your home and family from day one. Smart, loyal, and dependable—find your ultimate family protector in Los Angeles today.",
+            ctaText: "FIND YOUR PROTECTOR",
+            ctaLink: "protection-dogs-for-sale"
         }
 
     ];
